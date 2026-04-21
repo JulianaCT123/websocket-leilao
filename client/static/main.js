@@ -1,4 +1,3 @@
-// main.js
 import { 
   showScreen, setupRoleUI, updateAuctionItem, updateHighestBid, 
   updateTimer, renderPlayersList, renderWinners, showError, setRoomLinkAndQRCode 
@@ -22,8 +21,15 @@ function handleServerMessage(data) {
   if (data.type === "init") {
     // O servidor confirmou a entrada
     setupRoleUI(data.role);
+    
     if (data.role === "client") {
       showScreen("screen-waiting");
+      
+      // --- TRAVA 1: BLOQUEIO VISUAL ---
+      // Esconde o campo de digitar o nome para o usuário não conseguir trocar
+      const clientControls = document.getElementById("client-controls");
+      clientControls.classList.remove("flex");
+      clientControls.classList.add("hidden");
     }
   } 
   else if (data.type === "update") {
@@ -32,7 +38,7 @@ function handleServerMessage(data) {
     // Atualiza a lista de jogadores no lobby
     renderPlayersList(state.players);
 
-    // Troca de ecrã conforme o status do leilão no Python
+    // Troca de tela conforme o status do leilão no Python
     if (state.status === "waiting") {
       showScreen("screen-waiting");
     } 
@@ -52,7 +58,7 @@ function handleServerMessage(data) {
   }
 }
 
-// --- AÇÕES DO UTILIZADOR ---
+// --- AÇÕES DO USUÁRIO ---
 
 async function createRoom() {
   try {
@@ -70,6 +76,16 @@ function connect(roomId, hostMode, playerName) {
   currentRoom = roomId;
   isHost = hostMode;
   myName = playerName;
+
+  // --- TRAVA 2: BLOQUEIO DE NAVEGADOR ---
+  // Trocamos para localStorage. Agora, mesmo que ele abra 10 abas diferentes, 
+  // o navegador vai lembrar que ele é a mesma pessoa.
+  if (playerName) {
+    localStorage.setItem(`leilao_nome_${roomId}`, playerName);
+  }
+  if (hostMode) {
+    localStorage.setItem(`leilao_host_${roomId}`, "true");
+  }
 
   socket = createSocket(
     roomId, 
@@ -89,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const hostParam = params.get("isHost") === "true";
 
-  // 1. Configuração de Botões
+  // 1. Configuração de Botões (Sensores de clique)
   document.getElementById("btn-create-room").addEventListener("click", createRoom);
 
   document.getElementById("btn-join").addEventListener("click", () => {
@@ -97,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nameInput.value.trim()) {
       connect(roomId, false, nameInput.value.trim());
     } else {
-      showError("Por favor, introduz o teu nome.");
+      showError("Por favor, digite o seu nome.");
     }
   });
 
@@ -120,14 +136,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 2. Lógica de entrada automática
   if (roomId) {
-    if (hostParam) {
-      // Se sou o Host, conecto-me logo e gero o QR Code
+    // Procura na memória PERMANENTE do navegador
+    const savedName = localStorage.getItem(`leilao_nome_${roomId}`);
+    const savedHost = localStorage.getItem(`leilao_host_${roomId}`) === "true";
+    
+    const amIHost = hostParam || savedHost;
+
+    if (amIHost) {
       const fullLink = window.location.origin + "/?sala=" + roomId;
       setRoomLinkAndQRCode(fullLink);
       showScreen("screen-waiting");
       connect(roomId, true, null);
-    } else {
-      // Se sou Cliente, mostro a tela para pôr o nome
+    } 
+    else if (savedName) {
+      showScreen("screen-waiting");
+      setupRoleUI("client");
+      connect(roomId, false, savedName);
+    } 
+    else {
       showScreen("screen-waiting");
       setupRoleUI("client");
     }

@@ -10,21 +10,24 @@ class AuctionLogic:
         return self._state
 
     def add_player(self, name: str) -> tuple[bool, str]:
+        # REGRA 1: Se o nome já está na lista, é o cliente voltando (deu F5)
+        # Deixamos ele entrar direto!
+        if name in self._state.players:
+            return True, "Reconectado com sucesso!"
+
+        # REGRA 2: Se é um cliente NOVO, o leilão não pode ter começado
         if self._state.status != "waiting":
             return False, "O leilão já começou ou já terminou."
         
-        # Limite de 3 clientes para testes, como você pediu
+        # REGRA 3: Limite de 3 clientes para testes
         if len(self._state.players) >= 3:
             return False, "A sala já está cheia (limite de 3 clientes)."
-            
-        if name in self._state.players:
-            return False, "Esse nome já está em uso na sala."
 
-        # Cria uma nova lista de jogadores adicionando o novo nome
+        # Se passou em tudo, adiciona o cliente novo na sala
         new_players = self._state.players + [name]
         self._state = replace(self._state, players=new_players)
         return True, "Entrou com sucesso!"
-
+        
     def start_auction(self) -> bool:
         if self._state.status == "waiting":
             self._state = replace(self._state, status="running", time_remaining=60)
