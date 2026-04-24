@@ -1,8 +1,6 @@
-// ws.js
 export function createSocket(roomId, isHost, playerName, onMessage, onOpen, onClose, onError) {
   const url = new URL(`ws://${window.location.host}/ws`);
   
-  // Adicionamos os parâmetros que o nosso handlers.py espera receber
   url.searchParams.set("sala", roomId);
   url.searchParams.set("host", isHost);
   if (playerName) {

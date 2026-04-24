@@ -1,6 +1,3 @@
-// --- 1. CONTROLE DE TELAS (Navegação) ---
-
-// Esconde todas as telas e mostra apenas a que queremos
 export function showScreen(screenId) {
   const screens = ["screen-home", "screen-waiting", "screen-auction", "screen-results"];
   
@@ -9,7 +6,7 @@ export function showScreen(screenId) {
     if (el) {
       el.classList.add("hidden"); // Esconde
       if (id === "screen-waiting" || id === "screen-auction" || id === "screen-results") {
-        el.classList.remove("flex"); // Remove o flex das telas que usam flex-col
+        el.classList.remove("flex"); 
       }
     }
   });
@@ -18,12 +15,12 @@ export function showScreen(screenId) {
   if (target) {
     target.classList.remove("hidden");
     if (screenId !== "screen-home") {
-      target.classList.add("flex"); // Devolve o flex para manter o layout centralizado
+      target.classList.add("flex"); 
     }
   }
 }
 
-// Mostra os controles certos na sala de espera dependendo de quem você é
+
 export function setupRoleUI(role) {
   const hostControls = document.getElementById("host-controls");
   const clientControls = document.getElementById("client-controls");
@@ -34,19 +31,18 @@ export function setupRoleUI(role) {
     hostControls.classList.remove("hidden");
     hostControls.classList.add("flex");
     clientControls.classList.add("hidden");
-    bidControls.classList.add("hidden"); // Host não dá lance!
-    btnHome.classList.remove("hidden"); // Host pode voltar pro início no final
+    bidControls.classList.add("hidden"); 
+    btnHome.classList.remove("hidden"); 
   } else {
     hostControls.classList.add("hidden");
     clientControls.classList.remove("hidden");
     clientControls.classList.add("flex");
     bidControls.classList.remove("hidden");
-    bidControls.classList.add("flex"); // Cliente pode dar lance
+    bidControls.classList.add("flex"); 
     btnHome.classList.add("hidden");
   }
 }
 
-// --- 2. ATUALIZAÇÕES DO LEILÃO (A Fotografia) ---
 
 export function updateAuctionItem(item) {
   if (!item) return;
@@ -66,14 +62,13 @@ export function updateTimer(seconds) {
 
 export function renderPlayersList(players) {
   const container = document.getElementById("players-list");
-  container.innerHTML = ""; // Limpa a lista anterior
+  container.innerHTML = ""; 
 
   if (players.length === 0) {
     container.innerHTML = '<span class="text-slate-500 italic">Ninguém entrou ainda.</span>';
     return;
   }
 
-  // Cria um "balãozinho" para cada jogador
   players.forEach(name => {
     const badge = document.createElement("span");
     badge.className = "px-3 py-1 bg-slate-700 rounded-full text-sm font-semibold";
@@ -93,26 +88,28 @@ export function renderWinners(winners) {
 
   winners.forEach(w => {
     const div = document.createElement("div");
-    div.className = "p-4 bg-slate-800 rounded-xl border border-slate-700 flex justify-between items-center";
+    // Mudamos para flex-col no celular e flex-row no computador, adicionando um gap (espaço)
+    div.className = "p-4 bg-slate-800 rounded-xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3";
+    
     div.innerHTML = `
-      <div>
+      <div class="w-full sm:w-auto">
         <p class="text-sm text-slate-400">Lote ${w.auction_number}: ${w.item_name}</p>
-        <p class="text-xl font-bold text-emerald-400">${w.winner_name}</p>
+        <p class="text-xl font-bold text-emerald-400 break-all">${w.winner_name}</p>
       </div>
-      <div class="text-2xl font-bold">R$ ${w.amount.toFixed(2)}</div>
+      <div class="text-2xl font-bold break-all w-full sm:w-auto sm:text-right text-emerald-100">
+        R$ ${w.amount.toFixed(2)}
+      </div>
     `;
     container.appendChild(div);
   });
 }
 
-// --- 3. UTILITÁRIOS (Avisos e QR Code) ---
 
 export function showError(message) {
   const alertBox = document.getElementById("alert-box");
   alertBox.textContent = message;
   alertBox.classList.remove("hidden");
 
-  // Esconde o aviso automaticamente depois de 4 segundos
   setTimeout(() => {
     alertBox.classList.add("hidden");
   }, 4000);
@@ -123,14 +120,13 @@ export function setRoomLinkAndQRCode(link) {
   linkEl.href = link;
   linkEl.textContent = link;
 
-  // Limpa o QR Code antigo (se houver) e gera um novo
   const qrContainer = document.getElementById("qrcode");
   qrContainer.innerHTML = "";
   new QRCode(qrContainer, {
     text: link,
     width: 150,
     height: 150,
-    colorDark: "#020617", // Cor do Tailwind (slate-950)
+    colorDark: "#020617", 
     colorLight: "#ffffff",
   });
 }

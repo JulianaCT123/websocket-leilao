@@ -10,27 +10,22 @@ class AuctionLogic:
         return self._state
 
     def add_player(self, name: str) -> tuple[bool, str]:
-        # REGRA 1: Se o nome já está na lista, é o cliente voltando (deu F5)
-        # Deixamos ele entrar direto!
         if name in self._state.players:
             return True, "Reconectado com sucesso!"
 
-        # REGRA 2: Se é um cliente NOVO, o leilão não pode ter começado
         if self._state.status != "waiting":
             return False, "O leilão já começou ou já terminou."
         
-        # REGRA 3: Limite de 3 clientes para testes
-        if len(self._state.players) >= 3:
-            return False, "A sala já está cheia (limite de 3 clientes)."
+        if len(self._state.players) >= 40:
+            return False, "A sala já está cheia (limite de 40 clientes)."
 
-        # Se passou em tudo, adiciona o cliente novo na sala
         new_players = self._state.players + [name]
         self._state = replace(self._state, players=new_players)
         return True, "Entrou com sucesso!"
         
     def start_auction(self) -> bool:
         if self._state.status == "waiting":
-            self._state = replace(self._state, status="running", time_remaining=60)
+            self._state = replace(self._state, status="running", time_remaining=30)
             return True
         return False
 
@@ -46,7 +41,6 @@ class AuctionLogic:
         if amount <= self._state.highest_bid:
             return False, f"O lance deve ser maior que o lance atual (R$ {self._state.highest_bid})."
 
-        # Se passou pelas regras, atualiza o vencedor e o valor atual
         self._state = replace(self._state, highest_bid=amount, highest_bidder=player_name)
         return True, "Lance registrado com sucesso!"
 
@@ -57,14 +51,12 @@ class AuctionLogic:
         new_time = self._state.time_remaining - 1
 
         if new_time > 0:
-            # Apenas diminui o relógio
+
             self._state = replace(self._state, time_remaining=new_time)
         else:
-            # O TEMPO ACABOU! Fazer a transição de item
             new_winners = list(self._state.winners)
             current_item = self._state.items[self._state.current_item_index]
             
-            # Se alguém deu lance, salva nos vencedores
             if self._state.highest_bidder:
                 new_winners.append({
                     "auction_number": self._state.current_item_index + 1,
@@ -76,14 +68,12 @@ class AuctionLogic:
             next_index = self._state.current_item_index + 1
             
             if next_index >= len(self._state.items):
-                # Acabaram os itens! Finaliza a sala
                 self._state = replace(self._state, status="finished", time_remaining=0, winners=new_winners)
             else:
-                # Passa para o próximo item, reseta o tempo e os lances
                 self._state = replace(
                     self._state, 
                     current_item_index=next_index, 
-                    time_remaining=60, 
+                    time_remaining=30, 
                     highest_bid=0.0, 
                     highest_bidder=None,
                     winners=new_winners

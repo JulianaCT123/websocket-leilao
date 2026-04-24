@@ -4,13 +4,10 @@ import {
 } from "./ui.js";
 import { createSocket } from "./ws.js";
 
-// Variáveis de estado global do cliente
 let socket = null;
 let currentRoom = null;
 let isHost = false;
 let myName = null;
-
-// --- FUNÇÕES DE APOIO ---
 
 function getRoomFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -19,14 +16,12 @@ function getRoomFromUrl() {
 
 function handleServerMessage(data) {
   if (data.type === "init") {
-    // O servidor confirmou a entrada
+
     setupRoleUI(data.role);
     
     if (data.role === "client") {
       showScreen("screen-waiting");
       
-      // --- TRAVA 1: BLOQUEIO VISUAL ---
-      // Esconde o campo de digitar o nome para o usuário não conseguir trocar
       const clientControls = document.getElementById("client-controls");
       clientControls.classList.remove("flex");
       clientControls.classList.add("hidden");
@@ -35,10 +30,8 @@ function handleServerMessage(data) {
   else if (data.type === "update") {
     const state = data.state;
     
-    // Atualiza a lista de jogadores no lobby
     renderPlayersList(state.players);
 
-    // Troca de tela conforme o status do leilão no Python
     if (state.status === "waiting") {
       showScreen("screen-waiting");
     } 
@@ -58,14 +51,11 @@ function handleServerMessage(data) {
   }
 }
 
-// --- AÇÕES DO USUÁRIO ---
-
 async function createRoom() {
   try {
     const response = await fetch("/api/create-room");
     const data = await response.json();
     
-    // Ao criar, recarregamos a página com ?sala=ID e um aviso que somos o Host
     window.location.href = `/?sala=${data.room_id}&isHost=true`;
   } catch (error) {
     showError("Falha ao criar sala.");
@@ -77,9 +67,6 @@ function connect(roomId, hostMode, playerName) {
   isHost = hostMode;
   myName = playerName;
 
-  // --- TRAVA 2: BLOQUEIO DE NAVEGADOR ---
-  // Trocamos para localStorage. Agora, mesmo que ele abra 10 abas diferentes, 
-  // o navegador vai lembrar que ele é a mesma pessoa.
   if (playerName) {
     localStorage.setItem(`leilao_nome_${roomId}`, playerName);
   }
@@ -98,14 +85,11 @@ function connect(roomId, hostMode, playerName) {
   );
 }
 
-// --- INICIALIZAÇÃO ---
-
 document.addEventListener("DOMContentLoaded", () => {
   const roomId = getRoomFromUrl();
   const params = new URLSearchParams(window.location.search);
   const hostParam = params.get("isHost") === "true";
 
-  // 1. Configuração de Botões (Sensores de clique)
   document.getElementById("btn-create-room").addEventListener("click", createRoom);
 
   document.getElementById("btn-join").addEventListener("click", () => {
@@ -126,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const amount = parseFloat(bidInput.value);
     if (amount > 0) {
       socket.send(JSON.stringify({ action: "bid", amount: amount }));
-      bidInput.value = ""; // Limpa o campo após dar o lance
+      bidInput.value = ""; 
     }
   });
 
@@ -134,9 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/";
   });
 
-  // 2. Lógica de entrada automática
   if (roomId) {
-    // Procura na memória PERMANENTE do navegador
     const savedName = localStorage.getItem(`leilao_nome_${roomId}`);
     const savedHost = localStorage.getItem(`leilao_host_${roomId}`) === "true";
     
