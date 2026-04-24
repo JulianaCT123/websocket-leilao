@@ -4,7 +4,7 @@ export function showScreen(screenId) {
   screens.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.classList.add("hidden"); // Esconde
+      el.classList.add("hidden"); 
       if (id === "screen-waiting" || id === "screen-auction" || id === "screen-results") {
         el.classList.remove("flex"); 
       }
@@ -88,7 +88,6 @@ export function renderWinners(winners) {
 
   winners.forEach(w => {
     const div = document.createElement("div");
-    // Mudamos para flex-col no celular e flex-row no computador, adicionando um gap (espaço)
     div.className = "p-4 bg-slate-800 rounded-xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3";
     
     div.innerHTML = `

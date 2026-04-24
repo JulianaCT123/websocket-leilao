@@ -16,7 +16,7 @@ class AuctionState:
         default_factory=lambda: [
             Item(id=1, name="Carro de Luxo", image_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkd1pYNCwd2zRwpn41yr3y3JRJFCMG8Oyj3Q&s", initial_bid=5.0),
             Item(id=2, name="A Lua", image_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFKHPqv8wgWWV_3xg6v1gZFFd8QPkmLAhAEw&s", initial_bid=1000.0),
-            Item(id=3, name="Quadro Renascentista", image_url="https://via.placeholder.com/300?text=Quadro", initial_bid=15000.0)
+            Item(id=3, name="Coca geladinha", image_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5HPgdaUihdXj8nxi0DoIPFwCMvzgXjboVcA&s", initial_bid=15000.0)
         ]
     )
 
